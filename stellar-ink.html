@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>stellar-ink · Vue 3 + Spring Cloud Alibaba 写作社区 · YAX-J</title>
 <meta name="description" content="stellar-ink 的系统结构：三个 Java 进程、网关鉴权与 Redis 撤销列表、命名空间版本缓存、Docker Compose 部署，以及为什么把服务收敛成两个。">
-<meta name="theme-color" content="#e8eae3">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6e8e0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="stellar-ink · 写作社区的系统结构与取舍">
+<meta property="og:description" content="三个 Java 进程、网关鉴权与 Redis 撤销列表、命名空间版本缓存、Docker Compose 部署。">
+<meta property="og:image" content="og.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -16,229 +21,204 @@
   <header class="masthead">
     <a class="brand" href="index.html">YAX-J</a>
     <nav class="nav" aria-label="主导航">
-      <a href="index.html">全部项目</a>
-      <a href="https://github.com/YAX-J/stellar-ink" class="ext">仓库</a>
+      <a href="index.html" aria-current="page">全部项目</a>
+      <a href="https://github.com/YAX-J/stellar-ink">仓库</a>
     </nav>
   </header>
 </div>
 
 <main id="main" class="case">
-  <nav class="crumb" aria-label="面包屑"><a href="index.html">全部项目</a> / stellar-ink</nav>
+  <nav class="crumb" aria-label="面包屑"><a href="index.html">全部项目</a><span class="sep">/</span>stellar-ink</nav>
 
-  <header class="case-head">
-    <h1>stellar-ink</h1>
-    <p class="dek">写作社区。前端 Vue 3，后端是 Spring Cloud Alibaba 的三个 Java 进程，前面挡一层 Nginx。</p>
+  <div class="case-grid">
+    <aside class="toc" aria-label="本页目录">
+      <p class="toc-head">本页</p>
+      <ol>
+        <li><a href="#what" class="is-active">它是什么</a></li>
+        <li><a href="#arch">系统结构</a></li>
+        <li><a href="#decisions">关键决定</a></li>
+        <li><a href="#request">请求路径</a></li>
+        <li><a href="#deploy">部署与运维</a></li>
+        <li><a href="#limits">已知边界</a></li>
+      </ol>
+    </aside>
 
-    <dl class="case-meta">
-      <div><dt>角色</dt><dd>设计 + 全栈开发</dd></div>
-      <div><dt>时间</dt><dd>2026.09 起</dd></div>
-      <div><dt>状态</dt><dd>持续开发</dd></div>
-      <div><dt>仓库</dt><dd><a href="https://github.com/YAX-J/stellar-ink">stellar-ink</a></dd></div>
-      <div><dt>前端</dt><dd>Vue 3 + Vite</dd></div>
-      <div><dt>后端</dt><dd>3 个 Java 进程</dd></div>
-      <div><dt>数据</dt><dd>MySQL + Redis</dd></div>
-      <div><dt>部署</dt><dd>Docker Compose + Nginx</dd></div>
-    </dl>
-  </header>
+    <div class="case-body">
+      <header class="case-head">
+        <h1>stellar-ink</h1>
+        <p class="dek">写作社区。前端 Vue 3，后端是 Spring Cloud Alibaba 的三个 Java 进程，前面挡一层 Nginx。</p>
 
-  <div class="prose">
+        <dl class="case-meta">
+          <div><dt>角色</dt><dd>设计 + 全栈开发</dd></div>
+          <div><dt>时间</dt><dd>2026.09 起</dd></div>
+          <div><dt>状态</dt><dd>持续开发</dd></div>
+          <div><dt>仓库</dt><dd><a href="https://github.com/YAX-J/stellar-ink">stellar-ink</a></dd></div>
+          <div><dt>前端</dt><dd>Vue 3 + Vite</dd></div>
+          <div><dt>后端</dt><dd>3 个 Java 进程</dd></div>
+          <div><dt>数据</dt><dd>MySQL + Redis</dd></div>
+          <div><dt>部署</dt><dd>Compose + Nginx</dd></div>
+        </dl>
+      </header>
 
-    <section>
-      <h2>它是什么</h2>
-      <p>
-        星墨是一个写作社区。作者发文章、记私有笔记、写流星备忘录、丢回声漂流瓶；读者浏览、评论、加友链。
-        仓库里同时放着前端 <b>stellar-ink-web</b>、后端 <b>stellar-ink-server</b>、部署配置 <b>deploy/</b>、
-        接口与架构文档 <b>docs/</b>，以及一份 AI 编排模块的方案 <b>stellar-ink-ai</b>（还没实现）。
-      </p>
-      <p>
-        后端拆得不复杂：一个网关、两个业务服务，共用一个 MySQL 库和一个 Redis。复杂度不在服务数量，
-        在鉴权放在哪一层、缓存怎么失效、私有内容怎么隔离。
-      </p>
-    </section>
+      <div class="prose">
 
-    <section>
-      <h2>系统结构</h2>
-      <figure class="figure">
-        <svg class="diagram diagram--lg" viewBox="-12 0 748 440" role="img" aria-labelledby="fig-arch-t" aria-describedby="fig-arch-d">
-          <title id="fig-arch-t">stellar-ink 分层结构</title>
-          <desc id="fig-arch-d">自上而下五层：展示层是 Vue 3 单页应用；接入层由 Cloudflare 终止 TLS，Nginx 托管静态资源并反向代理；网关层是 8080 端口的 Spring Cloud Gateway；业务层是 8101 的用户服务和 8102 的内容服务；基础设施是 MySQL、Redis 和 Nacos。三个 Java 进程都注册到 Nacos。</desc>
+        <section id="what">
+          <h2>它是什么</h2>
+          <p>星墨是一个写作社区。作者发文章、记私有笔记、写流星备忘录、丢回声漂流瓶；读者浏览、评论、加友链。仓库里同时放着前端 <b>stellar-ink-web</b>、后端 <b>stellar-ink-server</b>、部署配置 <b>deploy/</b>、接口与架构文档 <b>docs/</b>，以及一份 AI 编排模块的方案 <b>stellar-ink-ai</b>（还没实现）。</p>
+          <p>后端拆得不复杂：一个网关、两个业务服务，共用一个 MySQL 库和一个 Redis。复杂度不在服务数量，在鉴权放在哪一层、缓存怎么失效、私有内容怎么隔离。</p>
+        </section>
 
-          <line class="rule" x1="-12" y1="88" x2="736" y2="88"/>
-          <line class="rule" x1="-12" y1="176" x2="736" y2="176"/>
-          <line class="rule" x1="-12" y1="264" x2="736" y2="264"/>
+        <section id="arch">
+          <h2>系统结构</h2>
+          <figure class="figure">
+            <svg class="diagram diagram--lg" viewBox="-12 0 748 440" role="img" aria-labelledby="fig-arch-t" aria-describedby="fig-arch-d">
+              <title id="fig-arch-t">stellar-ink 分层结构</title>
+              <desc id="fig-arch-d">自上而下五层：展示层是 Vue 3 单页应用；接入层由 Cloudflare 终止 TLS，Nginx 托管静态资源并反向代理；网关层是 8080 端口的 Spring Cloud Gateway；业务层是 8101 的用户服务和 8102 的内容服务；基础设施是 MySQL、Redis 和 Nacos。三个 Java 进程都注册到 Nacos。</desc>
 
-          <text class="gutter-label" x="0" y="48">展示层</text>
-          <rect class="box" x="116" y="14" width="280" height="60"/>
-          <text class="node-name" x="256" y="40" text-anchor="middle">Vue 3 SPA</text>
-          <text class="node-meta" x="256" y="57" text-anchor="middle">文章 / 笔记 / 流星 / 回声 / 友链</text>
+              <line class="rule" x1="-12" y1="88" x2="736" y2="88"/>
+              <line class="rule" x1="-12" y1="176" x2="736" y2="176"/>
+              <line class="rule" x1="-12" y1="264" x2="736" y2="264"/>
 
-          <rect class="box" x="416" y="14" width="160" height="60"/>
-          <text class="node-name" x="496" y="40" text-anchor="middle">Vite</text>
-          <text class="node-meta" x="496" y="57" text-anchor="middle">构建 · history 路由</text>
+              <text class="gutter-label" x="0" y="48">展示层</text>
+              <rect class="box" x="116" y="14" width="280" height="60"/>
+              <text class="node-name" x="256" y="40" text-anchor="middle">Vue 3 SPA</text>
+              <text class="node-meta" x="256" y="57" text-anchor="middle">文章 / 笔记 / 流星 / 回声 / 友链</text>
 
-          <text class="gutter-label" x="0" y="136">接入层</text>
-          <rect class="box" x="116" y="102" width="280" height="60"/>
-          <text class="node-name" x="256" y="128" text-anchor="middle">Nginx</text>
-          <text class="node-meta" x="256" y="145" text-anchor="middle">:443 静态 + 反代 + 限流</text>
-          <text class="callout" x="416" y="132">Cloudflare 终止 TLS</text>
-          <text class="callout" x="416" y="148">源站只放行 CF 网段</text>
+              <rect class="box" x="416" y="14" width="160" height="60"/>
+              <text class="node-name" x="496" y="40" text-anchor="middle">Vite</text>
+              <text class="node-meta" x="496" y="57" text-anchor="middle">构建 · history 路由</text>
 
-          <text class="gutter-label" x="0" y="224">网关层</text>
-          <rect class="box box-accent" x="116" y="190" width="280" height="60"/>
-          <text class="node-name" x="256" y="216" text-anchor="middle">Gateway</text>
-          <text class="node-meta" x="256" y="233" text-anchor="middle">:8080 · 显式路由 / Sa-Token</text>
-          <text class="callout" x="416" y="216">JWT 无状态验签</text>
-          <text class="callout" x="416" y="232">路由前查 Redis 撤销列表</text>
+              <text class="gutter-label" x="0" y="136">接入层</text>
+              <rect class="box" x="116" y="102" width="280" height="60"/>
+              <text class="node-name" x="256" y="128" text-anchor="middle">Nginx</text>
+              <text class="node-meta" x="256" y="145" text-anchor="middle">:443 静态 + 反代 + 限流</text>
+              <text class="callout" x="416" y="132">Cloudflare 终止 TLS</text>
+              <text class="callout" x="416" y="148">源站只放行 CF 网段</text>
 
-          <text class="gutter-label" x="0" y="312">业务层</text>
-          <rect class="box" x="116" y="278" width="280" height="60"/>
-          <text class="node-name" x="256" y="304" text-anchor="middle">user-service</text>
-          <text class="node-meta" x="256" y="321" text-anchor="middle">:8101 登录 · JWT · 头像</text>
+              <text class="gutter-label" x="0" y="224">网关层</text>
+              <rect class="box box-accent" x="116" y="190" width="280" height="60"/>
+              <text class="node-name" x="256" y="216" text-anchor="middle">Gateway</text>
+              <text class="node-meta" x="256" y="233" text-anchor="middle">:8080 · 显式路由 / Sa-Token</text>
+              <text class="callout" x="416" y="216">JWT 无状态验签</text>
+              <text class="callout" x="416" y="232">路由前查 Redis 撤销列表</text>
 
-          <rect class="box" x="416" y="278" width="300" height="60"/>
-          <text class="node-name" x="566" y="304" text-anchor="middle">content-service</text>
-          <text class="node-meta" x="566" y="321" text-anchor="middle">:8102 文章 · 笔记 · 统计</text>
+              <text class="gutter-label" x="0" y="312">业务层</text>
+              <rect class="box" x="116" y="278" width="280" height="60"/>
+              <text class="node-name" x="256" y="304" text-anchor="middle">user-service</text>
+              <text class="node-meta" x="256" y="321" text-anchor="middle">:8101 登录 · JWT · 头像</text>
 
-          <text class="gutter-label" x="0" y="400">基础设施</text>
-          <rect class="box" x="116" y="366" width="260" height="60"/>
-          <text class="node-name" x="246" y="392" text-anchor="middle">MySQL</text>
-          <text class="node-meta" x="246" y="409" text-anchor="middle">stellar_ink</text>
+              <rect class="box" x="416" y="278" width="300" height="60"/>
+              <text class="node-name" x="566" y="304" text-anchor="middle">content-service</text>
+              <text class="node-meta" x="566" y="321" text-anchor="middle">:8102 文章 · 笔记 · 统计</text>
 
-          <rect class="box" x="396" y="366" width="160" height="60"/>
-          <text class="node-name" x="476" y="392" text-anchor="middle">Redis</text>
-          <text class="node-meta" x="476" y="409" text-anchor="middle">缓存 · 撤销列表</text>
+              <text class="gutter-label" x="0" y="400">基础设施</text>
+              <rect class="box" x="116" y="366" width="260" height="60"/>
+              <text class="node-name" x="246" y="392" text-anchor="middle">MySQL</text>
+              <text class="node-meta" x="246" y="409" text-anchor="middle">stellar_ink</text>
 
-          <rect class="box" x="576" y="366" width="140" height="60"/>
-          <text class="node-name" x="646" y="392" text-anchor="middle">Nacos</text>
-          <text class="node-meta" x="646" y="409" text-anchor="middle">:8848 注册</text>
+              <rect class="box" x="396" y="366" width="160" height="60"/>
+              <text class="node-name" x="476" y="392" text-anchor="middle">Redis</text>
+              <text class="node-meta" x="476" y="409" text-anchor="middle">缓存 · 撤销列表</text>
 
-          <path class="wire" d="M256 74 V102"/>
-          <path class="wire" d="M256 162 V190"/>
-          <path class="wire" d="M256 250 V278"/>
-          <path class="wire" d="M256 338 V350 H566 V338"/>
-          <path class="wire" d="M246 350 V366"/>
-          <path class="wire" d="M476 350 V366"/>
-          <path class="wire" d="M646 350 V366"/>
-          <circle class="dot" cx="256" cy="350" r="2"/>
-          <circle class="dot" cx="566" cy="350" r="2"/>
-          <circle class="dot" cx="476" cy="350" r="2"/>
-          <circle class="dot" cx="646" cy="350" r="2"/>
-        </svg>
-        <figcaption>
-          <span>三个 Java 进程注册到 Nacos；MySQL 与 Redis 由两个业务服务共用</span>
-          <span class="swipe-hint">左右滑动看全图</span>
-          <span>端口 8080 / 8101 / 8102</span>
-        </figcaption>
-      </figure>
-    </section>
+              <rect class="box" x="576" y="366" width="140" height="60"/>
+              <text class="node-name" x="646" y="392" text-anchor="middle">Nacos</text>
+              <text class="node-meta" x="646" y="409" text-anchor="middle">:8848 注册</text>
 
-    <section>
-      <h2>几个关键决定</h2>
+              <path class="wire" d="M256 74 V102"/>
+              <path class="wire" d="M256 162 V190"/>
+              <path class="wire" d="M256 250 V278"/>
+              <path class="wire" d="M256 338 V350 H566 V338"/>
+              <path class="wire" d="M246 350 V366"/>
+              <path class="wire" d="M476 350 V366"/>
+              <path class="wire" d="M646 350 V366"/>
+              <circle class="dot" cx="256" cy="350" r="2"/>
+              <circle class="dot" cx="566" cy="350" r="2"/>
+              <circle class="dot" cx="476" cy="350" r="2"/>
+              <circle class="dot" cx="646" cy="350" r="2"/>
+            </svg>
+            <figcaption>
+              <span>三个 Java 进程注册到 Nacos；MySQL 与 Redis 由两个业务服务共用</span>
+              <span class="swipe-hint">左右滑动看全图</span>
+              <span>3 进程 · 5 层</span>
+            </figcaption>
+          </figure>
+        </section>
 
-      <div class="decision">
-        <h3>把服务收敛成两个<span>边界 / 运行单元</span></h3>
-        <div>
-          <p>
-            最初的拆法更碎：流星、回声、友链各占一个服务。后来把它们并进 content-service。
-            原因很实际：这些服务各自只有一个控制器、一个 Mapper 和一个实体，
-            独立 JVM、连接池、熔断配置的成本高于隔离带来的收益；写作统计要读文章数据，
-            独立服务还得多一次远程调用和一个故障点。
-          </p>
-          <p>
-            合并的是<b>运行单元</b>，不是领域边界：content-service 内部仍按 post、note、comment、
-            meteor、echo、link、stats 分包。文档里也写明了重新拆分的门槛——要独立扩缩容、独立库、
-            独立发布节奏，或者有明确的团队归属，而不是「表不一样」。
-          </p>
-        </div>
+        <section id="decisions">
+          <h2>几个关键决定</h2>
+
+          <div class="decision">
+            <h3>把服务收敛成两个<span>边界 / 运行单元</span></h3>
+            <div>
+              <p>最初的拆法更碎：流星、回声、友链各占一个服务。后来把它们并进 content-service。原因很实际：这些服务各自只有一个控制器、一个 Mapper 和一个实体，独立 JVM、连接池、熔断配置的成本高于隔离带来的收益；写作统计要读文章数据，独立服务还得多一次远程调用和一个故障点。</p>
+              <p>合并的是<b>运行单元</b>，不是领域边界：content-service 内部仍按 post、note、comment、meteor、echo、link、stats 分包。文档里也写明了重新拆分的门槛——要独立扩缩容、独立库、独立发布节奏，或者有明确的团队归属，而不是「表不一样」。</p>
+            </div>
+          </div>
+
+          <div class="decision">
+            <h3>关掉 discovery locator，只留显式路由<span>网关 / 攻击面</span></h3>
+            <div>
+              <p>Spring Cloud Gateway 默认可以把 <b>/{serviceId}/**</b> 转发到对应服务，配起来省事，但也给了一条绕过网关鉴权的路。这里把它关掉，路由表只有手写的几条；<b>/internal/**</b> 不对外暴露。网关只做第一层校验：验签、按路径和角色放行。</p>
+            </div>
+          </div>
+
+          <div class="decision">
+            <h3>JWT 不查库，但登出要立刻生效<span>鉴权 / Redis</span></h3>
+            <div>
+              <p>令牌由 user-service 签发，网关和两个业务服务用同一把密钥验签，所以鉴权不查库。问题在登出：无状态 JWT 在过期前一直有效。做法是把当前令牌的 SHA-256 摘要写进 Redis 撤销列表，键跟着令牌一起过期；网关在路由前用响应式 Redis 统一查一次。</p>
+              <p><b>安全状态不放行</b>：普通缓存读不到可以回源 MySQL，撤销列表读不到不能当没这回事。</p>
+            </div>
+          </div>
+
+          <div class="decision">
+            <h3>缓存键带版本号，写完整片失效<span>缓存 / 一致性</span></h3>
+            <div>
+              <p>列表接口的参数组合太多，逐个删键不现实。做法是用「命名空间版本 + 参数指纹」拼键：内容写入后原子推进版本号，所有旧参数组合立刻不可达。TTL 按热度分 30 秒、1 分钟、5 分钟；Redis 不可用时回源 MySQL 并熔断 30 秒，避免一挂就把数据库打穿。</p>
+            </div>
+          </div>
+
+          <div class="decision">
+            <h3>私有笔记：对谁都回 404<span>权限 / 内容隔离</span></h3>
+            <div>
+              <p>网关对所有 GET 放行，PRIVATE 笔记能不能读由 content-service 判断：非作者一律 404，ADMIN 也读不了别人的私有笔记。归属判定比文章更严——只有作者本人能改、能删。复核状态不落新列，由 <b>verified_at</b> 按 180 天实时派生。</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="request">
+          <h2>一次请求要过哪几道</h2>
+          <ul>
+            <li><b>Nginx</b>：静态资源直接返回；<b>/auth</b>、<b>/user</b>、<b>/posts</b> 等前缀反代到网关，顺手做限流。</li>
+            <li><b>Gateway</b>：验签、查撤销列表、按路径与角色放行；<b>/uploads/**</b> 只读、可匿名。</li>
+            <li><b>业务服务</b>：AuthHelper 复核身份与角色，再进业务逻辑。</li>
+            <li><b>数据层</b>：MyBatis-Plus 读写 MySQL；公开读走 Redis，写入后推进缓存版本。</li>
+          </ul>
+        </section>
+
+        <section id="deploy">
+          <h2>部署与运维</h2>
+          <ul>
+            <li>docker compose 起 Nginx、网关和两个业务服务；MySQL、Redis、Nacos 复用宿主机已有实例。</li>
+            <li>80 端口只留健康检查与跳转，443 用 Cloudflare 源站证书终止 TLS，源站只放行 Cloudflare 网段。</li>
+            <li>静态资源 30 天不可变缓存；SPA 刷新按 <b>GET + Accept: text/html</b> 回退 index.html，避免和 <b>/notes</b>、<b>/links</b>、<b>/search</b> 这些与 API 前缀同名的前端路由打架。</li>
+            <li>请求带 TraceId 贯穿三层；三个服务都开 Actuator 健康检查，Redis 断开会显示 DOWN。</li>
+          </ul>
+        </section>
+
+        <section id="limits">
+          <h2>已知边界</h2>
+          <div class="note">
+            <span class="note-title">还没做完的部分</span>
+            <p>AI 编排模块（stellar-ink-ai）目前只有方案，没有进 Maven 模块，也没进 Compose 编排。头像存储有本地磁盘和腾讯 COS 两种实现：本地模式要求文件和数据库同机可达，多实例部署会踩「上传成功但图片 404」，生产建议切对象存储。Redis 限流与分布式锁还没做，现在的限流压在 Nginx 上。</p>
+          </div>
+        </section>
+
       </div>
 
-      <div class="decision">
-        <h3>关掉 discovery locator，只留显式路由<span>网关 / 攻击面</span></h3>
-        <div>
-          <p>
-            Spring Cloud Gateway 默认可以把 <b>/{serviceId}/**</b> 转发到对应服务，配起来省事，
-            但也给了一条绕过网关鉴权的路。这里把它关掉，路由表只有手写的几条；
-            <b>/internal/**</b> 不对外暴露。网关只做第一层校验：验签、按路径和角色放行。
-          </p>
-        </div>
-      </div>
-
-      <div class="decision">
-        <h3>JWT 不查库，但登出要立刻生效<span>鉴权 / Redis</span></h3>
-        <div>
-          <p>
-            令牌由 user-service 签发，网关和两个业务服务用同一把密钥验签，所以鉴权不查库。
-            问题在登出：无状态 JWT 在过期前一直有效。做法是把当前令牌的 SHA-256 摘要写进 Redis
-            撤销列表，键跟着令牌一起过期；网关在路由前用响应式 Redis 统一查一次。
-          </p>
-          <p>
-            <b>安全状态不放行</b>：普通缓存读不到可以回源 MySQL，撤销列表读不到不能当没这回事。
-          </p>
-        </div>
-      </div>
-
-      <div class="decision">
-        <h3>缓存键带版本号，写完整片失效<span>缓存 / 一致性</span></h3>
-        <div>
-          <p>
-            列表接口的参数组合太多，逐个删键不现实。做法是用「命名空间版本 + 参数指纹」拼键：
-            内容写入后原子推进版本号，所有旧参数组合立刻不可达。TTL 按热度分 30 秒、1 分钟、5 分钟；
-            Redis 不可用时回源 MySQL 并熔断 30 秒，避免一挂就把数据库打穿。
-          </p>
-        </div>
-      </div>
-
-      <div class="decision">
-        <h3>私有笔记：对谁都回 404<span>权限 / 内容隔离</span></h3>
-        <div>
-          <p>
-            网关对所有 GET 放行，PRIVATE 笔记能不能读由 content-service 判断：非作者一律 404，
-            ADMIN 也读不了别人的私有笔记。归属判定比文章更严——只有作者本人能改、能删。
-            复核状态不落新列，由 <b>verified_at</b> 按 180 天实时派生。
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <h2>一次请求要过哪几道</h2>
-      <ul>
-        <li><b>Nginx</b>：静态资源直接返回；<b>/auth</b>、<b>/user</b>、<b>/posts</b> 等前缀反代到网关，顺手做限流。</li>
-        <li><b>Gateway</b>：验签、查撤销列表、按路径与角色放行；<b>/uploads/**</b> 只读、可匿名。</li>
-        <li><b>业务服务</b>：AuthHelper 复核身份与角色，再进业务逻辑。</li>
-        <li><b>数据层</b>：MyBatis-Plus 读写 MySQL；公开读走 Redis，写入后推进缓存版本。</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>部署与运维</h2>
-      <ul>
-        <li>docker compose 起 Nginx、网关和两个业务服务；MySQL、Redis、Nacos 复用宿主机已有实例。</li>
-        <li>80 端口只留健康检查与跳转，443 用 Cloudflare 源站证书终止 TLS，源站只放行 Cloudflare 网段。</li>
-        <li>静态资源 30 天不可变缓存；SPA 刷新按 <b>GET + Accept: text/html</b> 回退 index.html，
-          避免和 <b>/notes</b>、<b>/links</b>、<b>/search</b> 这些与 API 前缀同名的前端路由打架。</li>
-        <li>请求带 TraceId 贯穿三层；三个服务都开 Actuator 健康检查，Redis 断开会显示 DOWN。</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>已知边界</h2>
-      <div class="note">
-        <span class="note-title">还没做完的部分</span>
-        <p>
-          AI 编排模块（stellar-ink-ai）目前只有方案，没有进 Maven 模块，也没进 Compose 编排。
-          头像存储有本地磁盘和腾讯 COS 两种实现：本地模式要求文件和数据库同机可达，
-          多实例部署会踩「上传成功但图片 404」，生产建议切对象存储。
-          Redis 限流与分布式锁还没做，现在的限流压在 Nginx 上。
-        </p>
-      </div>
-    </section>
-
-  </div>
-
-  <div class="case-foot">
-    <a href="https://github.com/YAX-J/stellar-ink">github.com/YAX-J/stellar-ink</a>
-    <a href="index.html">全部项目</a>
+      <nav class="case-nav case-nav--single" aria-label="项目切换">
+        <a href="reposleuth.html"><span>下一个项目</span><strong>RepoSleuth</strong><em>多 Agent 读代码，出架构图与上手路线</em></a>
+      </nav>
+    </div>
   </div>
 </main>
 

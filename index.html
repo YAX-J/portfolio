@@ -5,10 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>YAX-J · Java 后端 / 微服务</title>
 <meta name="description" content="YAX-J 的项目：一套 Vue 3 + Spring Cloud Alibaba 的写作社区，和一个多 Agent 读代码、出架构图与上手路线的工具。">
-<meta name="theme-color" content="#e8eae3">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6e8e0">
 <meta property="og:type" content="website">
 <meta property="og:title" content="YAX-J · Java 后端 / 微服务">
 <meta property="og:description" content="把业务拆成服务，把服务跑到线上。两个独立完成的项目，含系统结构与取舍。">
+<meta property="og:image" content="og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -21,49 +26,31 @@
     <nav class="nav" aria-label="主导航">
       <a href="#work">项目</a>
       <a href="#about">关于</a>
-      <a href="https://github.com/YAX-J/" class="ext">GitHub</a>
+      <a href="https://github.com/YAX-J/" rel="me">GitHub</a>
     </nav>
   </header>
 
   <main id="main">
 
     <section class="hero">
-      <div>
+      <div class="hero-copy">
         <p class="hero-role rise">Java 后端 / 微服务</p>
-        <h1 class="rise" data-delay="60">把业务拆成服务，<br>把服务跑到线上。</h1>
-        <p class="lede rise" data-delay="120">
-          我是 YAX-J，写 Java 后端。手上有两个从零搭起来的项目：一套带网关、鉴权、限流和
-          Docker 部署的写作社区，和一个能自己翻仓库、出架构图的多 Agent 工具。
-          下面的图纸说明它们怎么搭起来，以及为什么这么搭。
-        </p>
-        <div class="hero-links rise" data-delay="180">
-          <a class="primary" href="#work">看两个项目</a>
-          <a class="ghost" href="https://github.com/YAX-J/">GitHub 上的仓库</a>
+        <h1 class="rise" style="--d:70ms">把业务拆成服务，<br>把服务跑到线上。</h1>
+        <p class="lede rise" style="--d:140ms">我是 YAX-J，写 Java 后端。手上有两个从零搭起来的项目：一套带网关、鉴权、限流和 Docker 部署的写作社区，和一个能自己翻仓库、出架构图的多 Agent 工具。下面的图纸说明它们怎么搭起来，以及为什么这么搭。</p>
+        <div class="hero-links rise" style="--d:210ms">
+          <a class="btn" href="#work">看两个项目</a>
+          <a class="quiet" href="https://github.com/YAX-J/">GitHub 上的仓库</a>
         </div>
       </div>
 
-      <aside class="spec rise" data-delay="240" aria-label="速览">
+      <aside class="plate rise" style="--d:280ms" aria-label="速览">
+        <div class="plate-head"><span>速览</span><span>2026.11</span></div>
         <dl>
-          <div>
-            <dt>方向</dt>
-            <dd>Java 后端 / 微服务</dd>
-          </div>
-          <div>
-            <dt>常用</dt>
-            <dd>Java 17 / Spring Boot 3 / Spring Cloud Alibaba / MySQL / Redis / Docker</dd>
-          </div>
-          <div>
-            <dt>代码</dt>
-            <dd><a href="https://github.com/YAX-J/">github.com/YAX-J</a></dd>
-          </div>
-          <div>
-            <dt>现在</dt>
-            <dd>stellar-ink 与 RepoSleuth 交替推进</dd>
-          </div>
-          <div>
-            <dt>状态</dt>
-            <dd>开放合作与机会</dd>
-          </div>
+          <div><dt>方向</dt><dd>Java 后端 / 微服务</dd></div>
+          <div><dt>常用</dt><dd>Java 17 / Spring Boot 3 / Spring Cloud Alibaba / MySQL / Redis / Docker</dd></div>
+          <div><dt>代码</dt><dd><a href="https://github.com/YAX-J/">github.com/YAX-J</a></dd></div>
+          <div><dt>现在</dt><dd>stellar-ink 与 RepoSleuth 交替推进</dd></div>
+          <div><dt>状态</dt><dd>开放合作与机会</dd></div>
         </dl>
       </aside>
     </section>
@@ -87,11 +74,7 @@
             <a href="stellar-ink.html">stellar-ink</a>
             <span class="zh">星墨 · 写作社区</span>
           </h3>
-          <p class="sum">
-            一个写作社区：文章、笔记、评论、流星、回声、友链和写作统计。前端是 Vue 3 单页应用，
-            后端是三个 Java 进程——网关、用户服务、内容服务，在 Nacos 上注册与取配置，
-            由 Docker Compose 起在一台机器上。
-          </p>
+          <p class="sum">一个写作社区：文章、笔记、评论、流星、回声、友链和写作统计。前端是 Vue 3 单页应用，后端是三个 Java 进程——网关、用户服务、内容服务，在 Nacos 上注册与取配置，由 Docker Compose 起在一台机器上。</p>
           <ul class="facts">
             <li>网关按路径和角色鉴权；登出与改密把令牌摘要写进 Redis 撤销列表，路由前拦截。</li>
             <li>缓存键是「命名空间版本 + 参数指纹」，写入后推进版本，旧参数组合立刻不可达。</li>
@@ -103,7 +86,7 @@
         <div class="entry-figure sheet-wrap">
           <figure class="sheet">
             <figcaption class="sheet-head">
-              <span>图 01 · 请求拓扑</span>
+              <span>请求拓扑</span>
               <span>stellar-ink</span>
             </figcaption>
             <div class="sheet-scroll">
@@ -175,10 +158,7 @@
             <a href="reposleuth.html">RepoSleuth</a>
             <span class="zh">多 Agent 代码侦探</span>
           </h3>
-          <p class="sum">
-            给它一个仓库链接，或者一句「帮我找一个处理 PDF 的 Python 库」；它自己检索、clone、精读，
-            最后交出 mermaid 架构图、新人上手路线和风险清单。也能当 MCP Server 挂进 Claude 或 Cursor。
-          </p>
+          <p class="sum">给它一个仓库链接，或者一句「帮我找一个处理 PDF 的 Python 库」；它自己检索、clone、精读，最后交出 mermaid 架构图、新人上手路线和风险清单。也能当 MCP Server 挂进 Claude 或 Cursor。</p>
           <ul class="facts">
             <li>Scout 先选库，三个分析 Agent 并行：画结构、看可读性、挑风险，最后由 Chief 汇总。</li>
             <li>LangGraph 状态机编排；检索排序 Top1 达到阈值才自动选定，否则把候选交给人确认。</li>
@@ -190,7 +170,7 @@
         <div class="entry-figure sheet-wrap">
           <figure class="sheet">
             <figcaption class="sheet-head">
-              <span>图 02 · 分析流水线</span>
+              <span>分析流水线</span>
               <span>RepoSleuth</span>
             </figcaption>
             <div class="sheet-scroll">
@@ -254,26 +234,16 @@
     <section id="about" class="about" aria-labelledby="about-title">
       <h2 id="about-title">在做的两件事</h2>
       <div class="body">
-        <p>
-          一是把微服务从「能跑」推到「能运维」：鉴权放在哪一层做、缓存什么时候该失效、
-          限流压在 Nginx 还是网关、配置怎么下发、登出之后令牌凭什么立刻作废。
-          <strong>stellar-ink 就是这些问题的草稿纸</strong>，代码和取舍都写在仓库里。
-        </p>
-        <p>
-          二是 Agent 工程：怎么让模型少编、多查证，怎么把中间过程做成看得见的事件流。
-          <strong>RepoSleuth 是我目前的答案</strong>——它不假装一次读完整个仓库，
-          而是先检索、再精读、最后把不确定的地方标出来交给人。
-        </p>
-        <p>
-          两边用的是同一套习惯：先画清楚边界，再写代码；能落到文档里的决定，不留在脑子里。
-        </p>
+        <p>一是把微服务从「能跑」推到「能运维」：鉴权放在哪一层做、缓存什么时候该失效、限流压在 Nginx 还是网关、配置怎么下发、登出之后令牌凭什么立刻作废。<strong>stellar-ink 就是这些问题的草稿纸</strong>，代码和取舍都写在仓库里。</p>
+        <p>二是 Agent 工程：怎么让模型少编、多查证，怎么把中间过程做成看得见的事件流。<strong>RepoSleuth 是我目前的答案</strong>——它不假装一次读完整个仓库，而是先检索、再精读、最后把不确定的地方标出来交给人。</p>
+        <p>两边用的是同一套习惯：先画清楚边界，再写代码；能落到文档里的决定，不留在脑子里。</p>
       </div>
     </section>
 
   </main>
 
   <footer class="site-foot">
-    <span>YAX-J · 2026 · 手写 HTML/CSS，没有框架</span>
+    <span>YAX-J · 2026 · 无框架、无统计脚本，全部手写</span>
     <div class="seal" aria-hidden="true">Y</div>
   </footer>
 </div>
