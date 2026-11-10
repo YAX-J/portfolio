@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YAX-J · Java 后端 / 微服务</title>
+<meta name="description" content="YAX-J 的项目：一套 Vue 3 + Spring Cloud Alibaba 的写作社区，和一个多 Agent 读代码、出架构图与上手路线的工具。">
+<meta name="theme-color" content="#e8eae3">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAX-J · Java 后端 / 微服务">
+<meta property="og:description" content="把业务拆成服务，把服务跑到线上。两个独立完成的项目，含系统结构与取舍。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<div class="shell">
+  <header class="masthead">
+    <a class="brand" href="index.html">YAX-J</a>
+    <nav class="nav" aria-label="主导航">
+      <a href="#work">项目</a>
+      <a href="#about">关于</a>
+      <a href="https://github.com/YAX-J/" class="ext">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <section class="hero">
+      <div>
+        <p class="hero-role rise">Java 后端 / 微服务</p>
+        <h1 class="rise" data-delay="60">把业务拆成服务，<br>把服务跑到线上。</h1>
+        <p class="lede rise" data-delay="120">
+          我是 YAX-J，写 Java 后端。手上有两个从零搭起来的项目：一套带网关、鉴权、限流和
+          Docker 部署的写作社区，和一个能自己翻仓库、出架构图的多 Agent 工具。
+          下面的图纸说明它们怎么搭起来，以及为什么这么搭。
+        </p>
+        <div class="hero-links rise" data-delay="180">
+          <a class="primary" href="#work">看两个项目</a>
+          <a class="ghost" href="https://github.com/YAX-J/">GitHub 上的仓库</a>
+        </div>
+      </div>
+
+      <aside class="spec rise" data-delay="240" aria-label="速览">
+        <dl>
+          <div>
+            <dt>方向</dt>
+            <dd>Java 后端 / 微服务</dd>
+          </div>
+          <div>
+            <dt>常用</dt>
+            <dd>Java 17 / Spring Boot 3 / Spring Cloud Alibaba / MySQL / Redis / Docker</dd>
+          </div>
+          <div>
+            <dt>代码</dt>
+            <dd><a href="https://github.com/YAX-J/">github.com/YAX-J</a></dd>
+          </div>
+          <div>
+            <dt>现在</dt>
+            <dd>stellar-ink 与 RepoSleuth 交替推进</dd>
+          </div>
+          <div>
+            <dt>状态</dt>
+            <dd>开放合作与机会</dd>
+          </div>
+        </dl>
+      </aside>
+    </section>
+
+    <section id="work" class="work" aria-labelledby="work-title">
+      <div class="section-head">
+        <h2 id="work-title">项目</h2>
+        <p>2 个仓库 / 最近推送 2026.11</p>
+      </div>
+
+      <!-- ============ stellar-ink ============ -->
+      <article class="entry">
+        <div class="entry-label">
+          <span class="state">持续开发</span>
+          <span>Java / 微服务</span>
+          <span>2026.09 起</span>
+        </div>
+
+        <div class="entry-main">
+          <h3>
+            <a href="stellar-ink.html">stellar-ink</a>
+            <span class="zh">星墨 · 写作社区</span>
+          </h3>
+          <p class="sum">
+            一个写作社区：文章、笔记、评论、流星、回声、友链和写作统计。前端是 Vue 3 单页应用，
+            后端是三个 Java 进程——网关、用户服务、内容服务，在 Nacos 上注册与取配置，
+            由 Docker Compose 起在一台机器上。
+          </p>
+          <ul class="facts">
+            <li>网关按路径和角色鉴权；登出与改密把令牌摘要写进 Redis 撤销列表，路由前拦截。</li>
+            <li>缓存键是「命名空间版本 + 参数指纹」，写入后推进版本，旧参数组合立刻不可达。</li>
+            <li>Nginx 前置：登录 10 次/分、公开写接口 6 次/分、其余 API 50 次/秒，静态资源缓存 30 天。</li>
+          </ul>
+          <a class="more" href="stellar-ink.html">看系统结构与取舍</a>
+        </div>
+
+        <div class="entry-figure sheet-wrap">
+          <figure class="sheet">
+            <figcaption class="sheet-head">
+              <span>图 01 · 请求拓扑</span>
+              <span>stellar-ink</span>
+            </figcaption>
+            <div class="sheet-scroll">
+              <svg class="diagram" viewBox="-10 0 460 244" role="img" aria-labelledby="fig-stellar-t" aria-describedby="fig-stellar-d">
+                <title id="fig-stellar-t">stellar-ink 请求拓扑</title>
+                <desc id="fig-stellar-d">浏览器里的 Vue 3 单页应用经 Nginx 反向代理到 8080 端口的网关，网关按显式路由分发到 8101 的用户服务和 8102 的内容服务，两个服务读写 MySQL 与 Redis。</desc>
+
+                <rect class="box" x="6" y="8" width="116" height="46"/>
+                <text class="node-name" x="64" y="28" text-anchor="middle">Vue 3 SPA</text>
+                <text class="node-meta" x="64" y="43" text-anchor="middle">Vite</text>
+
+                <rect class="box" x="150" y="8" width="120" height="46"/>
+                <text class="node-name" x="210" y="28" text-anchor="middle">Nginx</text>
+                <text class="node-meta" x="210" y="43" text-anchor="middle">静态 / 反代</text>
+
+                <rect class="box box-accent" x="296" y="8" width="138" height="46"/>
+                <text class="node-name" x="365" y="28" text-anchor="middle">Gateway</text>
+                <text class="node-meta" x="365" y="43" text-anchor="middle">:8080 鉴权 · 限流</text>
+
+                <path class="wire" d="M122 31 H150"/>
+                <path class="wire" d="M270 31 H296"/>
+
+                <path class="wire" d="M365 54 V78 H132 V96"/>
+                <path class="wire" d="M330 78 V96"/>
+                <circle class="dot" cx="330" cy="78" r="1.6"/>
+
+                <rect class="box" x="56" y="96" width="152" height="46"/>
+                <text class="node-name" x="132" y="116" text-anchor="middle">user-service</text>
+                <text class="node-meta" x="132" y="131" text-anchor="middle">:8101 登录 · 用户</text>
+
+                <rect class="box" x="248" y="96" width="164" height="46"/>
+                <text class="node-name" x="330" y="116" text-anchor="middle">content-service</text>
+                <text class="node-meta" x="330" y="131" text-anchor="middle">:8102 内容</text>
+
+                <path class="wire" d="M132 142 V162 H342 V186"/>
+                <path class="wire" d="M330 142 V162"/>
+                <circle class="dot" cx="330" cy="162" r="1.6"/>
+                <path class="wire" d="M148 162 V186"/>
+                <circle class="dot" cx="148" cy="162" r="1.6"/>
+
+                <rect class="box" x="56" y="186" width="184" height="46"/>
+                <text class="node-name" x="148" y="206" text-anchor="middle">MySQL</text>
+                <text class="node-meta" x="148" y="221" text-anchor="middle">stellar_ink</text>
+
+                <rect class="box" x="268" y="186" width="148" height="46"/>
+                <text class="node-name" x="342" y="206" text-anchor="middle">Redis</text>
+                <text class="node-meta" x="342" y="221" text-anchor="middle">缓存 · 撤销列表</text>
+              </svg>
+            </div>
+            <dl class="titleblock">
+              <div><dt>服务</dt><dd>3 个 Java 进程</dd></div>
+              <div><dt>端口</dt><dd>8080 / 8101 / 8102</dd></div>
+              <div><dt>部署</dt><dd>Docker Compose</dd></div>
+            </dl>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ============ RepoSleuth ============ -->
+      <article class="entry">
+        <div class="entry-label">
+          <span class="state">可用</span>
+          <span>Python / Agent</span>
+          <span>2026.09 起</span>
+        </div>
+
+        <div class="entry-main">
+          <h3>
+            <a href="reposleuth.html">RepoSleuth</a>
+            <span class="zh">多 Agent 代码侦探</span>
+          </h3>
+          <p class="sum">
+            给它一个仓库链接，或者一句「帮我找一个处理 PDF 的 Python 库」；它自己检索、clone、精读，
+            最后交出 mermaid 架构图、新人上手路线和风险清单。也能当 MCP Server 挂进 Claude 或 Cursor。
+          </p>
+          <ul class="facts">
+            <li>Scout 先选库，三个分析 Agent 并行：画结构、看可读性、挑风险，最后由 Chief 汇总。</li>
+            <li>LangGraph 状态机编排；检索排序 Top1 达到阈值才自动选定，否则把候选交给人确认。</li>
+            <li>测试用假模型加两个真实仓库做基线，不联网、不烧 token 也能跑。</li>
+          </ul>
+          <a class="more" href="reposleuth.html">看四个 Agent 怎么分工</a>
+        </div>
+
+        <div class="entry-figure sheet-wrap">
+          <figure class="sheet">
+            <figcaption class="sheet-head">
+              <span>图 02 · 分析流水线</span>
+              <span>RepoSleuth</span>
+            </figcaption>
+            <div class="sheet-scroll">
+              <svg class="diagram" viewBox="-10 0 460 318" role="img" aria-labelledby="fig-repo-t" aria-describedby="fig-repo-d">
+                <title id="fig-repo-t">RepoSleuth 的分析流水线</title>
+                <desc id="fig-repo-d">输入仓库链接或一句话需求后，Scout 检索并重排候选仓库；Cartographer、Reader、Auditor 三个 Agent 并行分析；Chief 汇总成包含 mermaid 架构图、上手路线与风险清单的报告。</desc>
+
+                <rect class="box box-accent" x="60" y="6" width="320" height="44"/>
+                <text class="node-name" x="220" y="24" text-anchor="middle">输入</text>
+                <text class="node-meta" x="220" y="38" text-anchor="middle">仓库链接 / 一句话需求</text>
+
+                <path class="wire" d="M220 50 V74"/>
+
+                <rect class="box" x="60" y="74" width="320" height="44"/>
+                <text class="node-name" x="220" y="92" text-anchor="middle">Scout</text>
+                <text class="node-meta" x="220" y="106" text-anchor="middle">检索 · 重排 · 选定仓库</text>
+
+                <path class="wire" d="M220 118 V126 H79 V142"/>
+                <path class="wire" d="M220 126 V142"/>
+                <path class="wire" d="M220 126 H361 V142"/>
+                <circle class="dot" cx="220" cy="126" r="1.6"/>
+
+                <rect class="box" x="15" y="142" width="128" height="48"/>
+                <text class="node-name" x="79" y="161" text-anchor="middle">Cartographer</text>
+                <text class="node-meta" x="79" y="176" text-anchor="middle">结构 · 架构图</text>
+
+                <rect class="box" x="156" y="142" width="128" height="48"/>
+                <text class="node-name" x="220" y="161" text-anchor="middle">Reader</text>
+                <text class="node-meta" x="220" y="176" text-anchor="middle">可读性 · 上手</text>
+
+                <rect class="box" x="297" y="142" width="128" height="48"/>
+                <text class="node-name" x="361" y="161" text-anchor="middle">Auditor</text>
+                <text class="node-meta" x="361" y="176" text-anchor="middle">风险 · 预警</text>
+
+                <path class="wire" d="M79 190 V202 H361"/>
+                <path class="wire" d="M220 190 V202"/>
+                <path class="wire" d="M220 202 V214"/>
+                <circle class="dot" cx="220" cy="202" r="1.6"/>
+
+                <rect class="box" x="60" y="214" width="320" height="44"/>
+                <text class="node-name" x="220" y="232" text-anchor="middle">Chief</text>
+                <text class="node-meta" x="220" y="246" text-anchor="middle">汇总 · 裁决 · 交付</text>
+
+                <path class="wire" d="M220 258 V268"/>
+
+                <rect class="box box-accent" x="60" y="268" width="320" height="44"/>
+                <text class="node-name" x="220" y="286" text-anchor="middle">报告</text>
+                <text class="node-meta" x="220" y="300" text-anchor="middle">Markdown + mermaid</text>
+              </svg>
+            </div>
+            <dl class="titleblock">
+              <div><dt>输出</dt><dd>mermaid 报告</dd></div>
+              <div><dt>入口</dt><dd>CLI / Web / MCP</dd></div>
+              <div><dt>版本</dt><dd>v0.4-mcp</dd></div>
+            </dl>
+          </figure>
+        </div>
+      </article>
+    </section>
+
+    <section id="about" class="about" aria-labelledby="about-title">
+      <h2 id="about-title">在做的两件事</h2>
+      <div class="body">
+        <p>
+          一是把微服务从「能跑」推到「能运维」：鉴权放在哪一层做、缓存什么时候该失效、
+          限流压在 Nginx 还是网关、配置怎么下发、登出之后令牌凭什么立刻作废。
+          <strong>stellar-ink 就是这些问题的草稿纸</strong>，代码和取舍都写在仓库里。
+        </p>
+        <p>
+          二是 Agent 工程：怎么让模型少编、多查证，怎么把中间过程做成看得见的事件流。
+          <strong>RepoSleuth 是我目前的答案</strong>——它不假装一次读完整个仓库，
+          而是先检索、再精读、最后把不确定的地方标出来交给人。
+        </p>
+        <p>
+          两边用的是同一套习惯：先画清楚边界，再写代码；能落到文档里的决定，不留在脑子里。
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-foot">
+    <span>YAX-J · 2026 · 手写 HTML/CSS，没有框架</span>
+    <div class="seal" aria-hidden="true">Y</div>
+  </footer>
+</div>
+
+<script src="assets/main.js"></script>
+</body>
+</html>
+

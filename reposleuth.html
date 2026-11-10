@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RepoSleuth · 多 Agent 读代码，出架构图与上手路线 · YAX-J</title>
+<meta name="description" content="RepoSleuth 用 LangGraph 编排四个 Agent 读陌生仓库：Scout 选库，Cartographer 画结构，Reader 写上手路线，Auditor 挑风险，最后交付 mermaid 报告。同一套工具也能挂成 MCP Server。">
+<meta name="theme-color" content="#e8eae3">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<div class="shell">
+  <header class="masthead">
+    <a class="brand" href="index.html">YAX-J</a>
+    <nav class="nav" aria-label="主导航">
+      <a href="index.html">全部项目</a>
+      <a href="https://github.com/YAX-J/RepoSleuth" class="ext">仓库</a>
+    </nav>
+  </header>
+</div>
+
+<main id="main" class="case">
+  <nav class="crumb" aria-label="面包屑"><a href="index.html">全部项目</a> / RepoSleuth</nav>
+
+  <header class="case-head">
+    <h1>RepoSleuth</h1>
+    <p class="dek">输入一个 GitHub 链接，多 Agent 分工读代码，交出架构图、新人上手路线和风险清单。</p>
+
+    <dl class="case-meta">
+      <div><dt>角色</dt><dd>设计 + 实现</dd></div>
+      <div><dt>时间</dt><dd>2026.09 起</dd></div>
+      <div><dt>状态</dt><dd>可用 · v0.4-mcp</dd></div>
+      <div><dt>仓库</dt><dd><a href="https://github.com/YAX-J/RepoSleuth">RepoSleuth</a></dd></div>
+      <div><dt>编排</dt><dd>LangGraph 状态机</dd></div>
+      <div><dt>入口</dt><dd>CLI / 网页 / MCP</dd></div>
+      <div><dt>模型</dt><dd>GLM-4-flash，可换</dd></div>
+      <div><dt>测试</dt><dd>7 个文件，离线可跑</dd></div>
+    </dl>
+  </header>
+
+  <div class="prose">
+
+    <section>
+      <h2>它解决什么</h2>
+      <p>
+        读一个陌生仓库，最费时间的不是读代码，是搞清楚从哪进、谁调谁、哪里会炸。
+        模型一次读不完大仓库，硬塞进去就会开始编。RepoSleuth 把这件事拆开：
+        先选对仓库，再分头读，最后交叉核对，产出一份能直接看的报告。
+      </p>
+      <p>输出三样东西：<b>mermaid 架构图</b>、<b>新人上手路线</b>、<b>风险预警清单</b>。</p>
+    </section>
+
+    <section>
+      <h2>流水线</h2>
+      <figure class="figure">
+        <svg class="diagram diagram--lg" viewBox="0 0 760 440" role="img" aria-labelledby="fig-flow-t" aria-describedby="fig-flow-d">
+          <title id="fig-flow-t">RepoSleuth 流水线</title>
+          <desc id="fig-flow-d">输入仓库链接或一句话需求，Scout 检索并重排候选仓库后，Cartographer、Reader、Auditor 三个 Agent 并行分析，最后由 Chief 汇总成 Markdown 与 mermaid 报告。</desc>
+
+          <rect class="box box-accent" x="230" y="10" width="300" height="50"/>
+          <text class="node-name" x="380" y="32" text-anchor="middle">输入</text>
+          <text class="node-meta" x="380" y="47" text-anchor="middle">仓库链接 / 一句话需求</text>
+
+          <path class="wire" d="M380 60 V90"/>
+
+          <rect class="box" x="230" y="90" width="300" height="50"/>
+          <text class="node-name" x="380" y="112" text-anchor="middle">Scout</text>
+          <text class="node-meta" x="380" y="127" text-anchor="middle">检索 · 重排 · 选定仓库</text>
+
+          <path class="wire" d="M380 140 V160 H170 V190"/>
+          <path class="wire" d="M380 140 V190"/>
+          <path class="wire" d="M380 160 H590 V190"/>
+          <circle class="dot" cx="380" cy="160" r="2"/>
+
+          <rect class="box" x="70" y="190" width="200" height="64"/>
+          <text class="node-name" x="86" y="216" text-anchor="start">Cartographer</text>
+          <text class="node-meta" x="86" y="233" text-anchor="start">目录 · 依赖 · 架构图</text>
+
+          <rect class="box" x="280" y="190" width="200" height="64"/>
+          <text class="node-name" x="296" y="216" text-anchor="start">Reader</text>
+          <text class="node-meta" x="296" y="233" text-anchor="start">入口 · 配置 · 上手路线</text>
+
+          <rect class="box" x="490" y="190" width="200" height="64"/>
+          <text class="node-name" x="506" y="216" text-anchor="start">Auditor</text>
+          <text class="node-meta" x="506" y="233" text-anchor="start">依赖 · 配置 · 风险</text>
+
+          <path class="wire" d="M170 254 V276 H590 V254"/>
+          <path class="wire" d="M380 254 V276"/>
+          <path class="wire" d="M380 276 V294"/>
+          <circle class="dot" cx="380" cy="276" r="2"/>
+
+          <rect class="box" x="230" y="294" width="300" height="50"/>
+          <text class="node-name" x="380" y="316" text-anchor="middle">Chief</text>
+          <text class="node-meta" x="380" y="331" text-anchor="middle">汇总 · 裁决矛盾</text>
+
+          <path class="wire" d="M380 344 V374"/>
+
+          <rect class="box box-accent" x="230" y="374" width="300" height="50"/>
+          <text class="node-name" x="380" y="396" text-anchor="middle">报告</text>
+          <text class="node-meta" x="380" y="411" text-anchor="middle">Markdown + mermaid</text>
+        </svg>
+        <figcaption>
+          <span>三个阶段：选库、并行精读、汇总成文</span>
+          <span class="swipe-hint">左右滑动看全图</span>
+          <span>同一套工具同时供 CLI、网页与 MCP 使用</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>谁在干活</h2>
+      <ul>
+        <li><b>Scout</b>：把模糊需求变成确定的仓库。GitHub 搜索后重排，Top1 达到阈值就直接用，否则把候选交给人选——避免猜错仓库后一路错到底。</li>
+        <li><b>Cartographer</b>：读目录、依赖和构建文件，画模块关系，输出 mermaid。</li>
+        <li><b>Reader</b>：找入口、配置和启动命令，写一条新人能照着走的上手路线。</li>
+        <li><b>Auditor</b>：查过期依赖、缺失配置、凭据泄露、缺失的 CI，按严重程度排序。</li>
+        <li><b>Chief</b>：汇总三份结论，处理互相矛盾的地方，最后成文。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>几个关键决定</h2>
+
+      <div class="decision">
+        <h3>编排交给状态机<span>LangGraph / 可定位</span></h3>
+        <div>
+          <p>
+            一次分析有固定阶段：解析需求、检索选库、三代理并行、主笔。写成状态机的理由是每一步的
+            输入输出都是显式的：出错能定位到具体节点，也能只重跑某一段，而不是从头再烧一遍 token。
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <h3>工具层做成无状态 MCP Server<span>边界 / 复用</span></h3>
+        <div>
+          <p>
+            检索、clone、建索引、扫风险、读文件都封装成 MCP 工具，和编排层分开。
+            这样同一套工具既能被 CLI 调，也能被 Claude、Cursor 直接挂载；服务本身不存会话，
+            水平扩展不用考虑粘性。
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <h3>选错仓库比选不出更贵<span>检索 / 确定性</span></h3>
+        <div>
+          <p>
+            模糊需求先做 GitHub 搜索，再对候选重排。只有 Top1 相似度达到阈值才自动选定，
+            否则把候选做成卡片让人点。自动化少一点，换掉的是「分析了半天、分析错仓库」这种最贵的事故。
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <h3>测试不碰网络，也不碰真模型<span>测试 / 防退化</span></h3>
+        <div>
+          <p>
+            单测用假的 chat model 替换 LLM，用本地模板仓库替换 GitHub；另外拿两个真实仓库
+            （pallets/click、httpie/cli）当基线。prompt 或检索逻辑改动后跑一遍，
+            防止报告质量悄悄退化——这类系统最怕的不是报错，是「看起来还行」。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>工程细节</h2>
+      <ul>
+        <li>网页端是 FastAPI + SSE：检索、精读、三个 Agent 的阶段事件实时推到页面，最后渲染 mermaid。</li>
+        <li>Gradio 单页保留人工确认环节，候选仓库和最终报告都能在页面上改。</li>
+        <li>模型可换：默认 glm-4-flash（免费额度），也支持 deepseek-chat、qwen 等 OpenAI 兼容接口。</li>
+        <li>CLI 与网页共用同一条流水线和同一个报告渲染层，输出保持一份格式。</li>
+        <li>五个 MCP 工具：<b>github_search</b>、<b>clone_repo</b>、<b>repo_map</b>、<b>risk_scan</b>、<b>ingest_repo</b>。</li>
+      </ul>
+      <pre class="code"><code>python -m venv .venv &amp;&amp; .venv/Scripts/pip install -e ".[orchestrator,web]"
+python -m reposleuth_orchestrator https://github.com/pallets/click --model glm-4-flash
+python -m reposleuth_web.server   # 打开 127.0.0.1:8000 看事件流</code></pre>
+    </section>
+
+    <section>
+      <h2>已知边界</h2>
+      <div class="note">
+        <span class="note-title">它现在做不到的事</span>
+        <p>
+          必须有 LLM key 才能跑。仓库太大时会撞上 token 预算，目前靠 scouting 阶段按体量预过滤，
+          不保证覆盖全仓；输出是「够用的摘要」，不是逐行理解。默认中文输出。
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="case-foot">
+    <a href="https://github.com/YAX-J/RepoSleuth">github.com/YAX-J/RepoSleuth</a>
+    <a href="index.html">全部项目</a>
+  </div>
+</main>
+
+<div class="shell">
+  <footer class="site-foot">
+    <span>YAX-J · 2026</span>
+    <div class="seal" aria-hidden="true">Y</div>
+  </footer>
+</div>
+
+<script src="assets/main.js"></script>
+</body>
+</html>
